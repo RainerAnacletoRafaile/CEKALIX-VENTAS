@@ -1,32 +1,7 @@
 package com.cekalix.dao;
-
-import com.cekalix.modelo.Usuario;
-import com.cekalix.util.ConexionBD;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Optional;
-
+import com.cekalix.modelo.Usuario;import com.cekalix.util.*;import java.sql.*;import java.util.*;
 public class UsuarioDAO {
-    public Optional<Usuario> validar(String nombreUsuario, String clave) throws SQLException {
-        String sql = "SELECT id_usuario, nombre, usuario, rol FROM usuario " +
-                     "WHERE usuario = ? AND clave = ? AND activo = 1";
-        try (Connection cn = ConexionBD.obtenerConexion();
-             PreparedStatement ps = cn.prepareStatement(sql)) {
-            ps.setString(1, nombreUsuario);
-            ps.setString(2, clave);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Usuario u = new Usuario();
-                    u.setIdUsuario(rs.getInt("id_usuario"));
-                    u.setNombre(rs.getString("nombre"));
-                    u.setUsuario(rs.getString("usuario"));
-                    u.setRol(rs.getString("rol"));
-                    return Optional.of(u);
-                }
-            }
-        }
-        return Optional.empty();
-    }
+ public Optional<Usuario> autenticar(String login,String clave)throws SQLException{String q="SELECT u.id_usuario,u.nombre,u.usuario,u.contrasena,r.nombre rol FROM usuario u JOIN rol r ON r.id_rol=u.id_rol WHERE u.usuario=? AND u.estado=1";try(Connection c=ConexionBD.obtenerConexion();PreparedStatement p=c.prepareStatement(q)){p.setString(1,login);try(ResultSet r=p.executeQuery()){if(r.next()&&PasswordUtil.verify(clave,r.getString("contrasena"))){Usuario u=new Usuario();u.setIdUsuario(r.getInt(1));u.setNombre(r.getString(2));u.setUsuario(r.getString(3));u.setRol(r.getString(5));return Optional.of(u);}}}return Optional.empty();}
+ public List<Usuario> listar()throws SQLException{List<Usuario> l=new ArrayList<>();String q="SELECT u.id_usuario,u.nombre,u.usuario,r.nombre rol FROM usuario u JOIN rol r ON r.id_rol=u.id_rol WHERE u.estado=1 ORDER BY u.nombre";try(Connection c=ConexionBD.obtenerConexion();PreparedStatement p=c.prepareStatement(q);ResultSet r=p.executeQuery()){while(r.next()){Usuario u=new Usuario();u.setIdUsuario(r.getInt(1));u.setNombre(r.getString(2));u.setUsuario(r.getString(3));u.setRol(r.getString(4));l.add(u);}}return l;}
+ public void crear(String n,String u,String k,String rol)throws SQLException{String q="INSERT INTO usuario(id_rol,nombre,usuario,contrasena) SELECT id_rol,?,?,? FROM rol WHERE nombre=?";try(Connection c=ConexionBD.obtenerConexion();PreparedStatement p=c.prepareStatement(q)){p.setString(1,n);p.setString(2,u);p.setString(3,PasswordUtil.hash(k));p.setString(4,rol);if(p.executeUpdate()!=1)throw new SQLException("Rol inválido.");}}
 }

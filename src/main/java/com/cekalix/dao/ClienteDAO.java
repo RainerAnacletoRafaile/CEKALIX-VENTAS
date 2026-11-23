@@ -1,0 +1,7 @@
+package com.cekalix.dao;
+import com.cekalix.modelo.Cliente;import com.cekalix.util.ConexionBD;import java.sql.*;import java.util.*;
+public class ClienteDAO {
+ public List<Cliente> listar()throws SQLException{List<Cliente> l=new ArrayList<>();try(Connection c=ConexionBD.obtenerConexion();PreparedStatement p=c.prepareStatement("SELECT * FROM cliente WHERE estado=1 ORDER BY razon_social");ResultSet r=p.executeQuery()){while(r.next()){Cliente x=new Cliente();x.setIdCliente(r.getInt("id_cliente"));x.setTipoCliente(r.getString("tipo_cliente"));x.setRazonSocial(r.getString("razon_social"));x.setRuc(r.getString("ruc"));x.setTelefono(r.getString("telefono"));x.setCorreo(r.getString("correo"));x.setDireccion(r.getString("direccion"));x.setContacto(r.getString("contacto"));l.add(x);}}return l;}
+ public void guardar(Cliente x)throws SQLException{String q="INSERT INTO cliente(tipo_cliente,razon_social,ruc,telefono,correo,direccion,contacto) VALUES(?,?,?,?,?,?,?)";try(Connection c=ConexionBD.obtenerConexion();PreparedStatement p=c.prepareStatement(q)){p.setString(1,x.getTipoCliente());p.setString(2,x.getRazonSocial());p.setString(3,blank(x.getRuc()));p.setString(4,blank(x.getTelefono()));p.setString(5,blank(x.getCorreo()));p.setString(6,blank(x.getDireccion()));p.setString(7,blank(x.getContacto()));p.executeUpdate();}}
+ private String blank(String s){return s==null||s.isBlank()?null:s.trim();}
+}
