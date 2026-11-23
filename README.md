@@ -5,8 +5,8 @@ Sistema web académico de ventas de CEKALIX S.A.C. con Java 17, JSP, Servlets, J
 - JDK 17, Maven 3.9+, Apache Tomcat 11 y MySQL 8.
 
 ## Instalación
-1. Ejecuta `database/cekalix_ventas.sql` en MySQL Workbench.
-2. Configura opcionalmente `CEKALIX_DB_URL`, `CEKALIX_DB_USER` y `CEKALIX_DB_PASSWORD`. Valores por defecto: localhost:3306/cekalix_ventas, root y contraseña vacía.
+1. Ejecuta `database/cekalix_ventas.sql` en MySQL Workbench. Crea una base independiente llamada `cekalix_ventas_mvc` y no elimina la base anterior `cekalix_ventas`.
+2. Configura opcionalmente `CEKALIX_DB_URL`, `CEKALIX_DB_USER` y `CEKALIX_DB_PASSWORD`. Valores por defecto: localhost:3306/cekalix_ventas_mvc, root y contraseña vacía.
 3. Ejecuta `mvn clean package`.
 4. Despliega `target/CEKALIX-VENTAS.war` en Tomcat 11 o importa como Existing Maven Project en Eclipse y usa Run on Server.
 5. Abre http://localhost:8080/CEKALIX-VENTAS/
