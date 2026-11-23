@@ -1,30 +1,6 @@
 package com.cekalix.controlador;
-
-import com.cekalix.dao.ProductoDAO;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
-import java.io.IOException;
-import java.sql.SQLException;
-
+import com.cekalix.dao.ProductoDAO;import jakarta.servlet.*;import jakarta.servlet.annotation.WebServlet;import jakarta.servlet.http.*;import java.io.*;import java.math.*;
 @WebServlet("/productos")
-public class ProductoServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
-    private final ProductoDAO productoDAO = new ProductoDAO();
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("usuarioSesion") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-        try {
-            request.setAttribute("productos", productoDAO.listar());
-            request.getRequestDispatcher("/WEB-INF/vistas/productos.jsp").forward(request, response);
-        } catch (SQLException e) {
-            throw new ServletException("Error al listar productos.", e);
-        }
-    }
-}
+public class ProductoServlet extends HttpServlet {private final ProductoDAO dao=new ProductoDAO();
+protected void doGet(HttpServletRequest q,HttpServletResponse p)throws ServletException,IOException{try{q.setAttribute("productos",dao.listar());q.getRequestDispatcher("/WEB-INF/vistas/productos.jsp").forward(q,p);}catch(Exception e){throw new ServletException(e);}}
+protected void doPost(HttpServletRequest q,HttpServletResponse p)throws ServletException,IOException{try{BigDecimal precio=new BigDecimal(q.getParameter("precio"));int stock=Integer.parseInt(q.getParameter("stock"));if(precio.signum()<0||stock<0)throw new IllegalArgumentException("Precio y stock no pueden ser negativos.");dao.guardar(q.getParameter("sku"),q.getParameter("nombre"),q.getParameter("descripcion"),precio,stock);p.sendRedirect(q.getContextPath()+"/productos");}catch(Exception e){throw new ServletException("No se pudo guardar el producto: "+e.getMessage(),e);}}}

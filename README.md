@@ -1,42 +1,36 @@
-# CEKALIX Ventas
+# CEKALIX-VENTAS
+Sistema web académico de ventas de CEKALIX S.A.C. con Java 17, JSP, Servlets, JDBC, MySQL 8 y Tomcat 11. Arquitectura MVC + DAO.
 
-Sistema web académico de ventas con Java, Servlets, JSP, JavaBeans, JDBC y MySQL, organizado con MVC sencillo.
+## Requisitos
+- JDK 17, Maven 3.9+, Apache Tomcat 11 y MySQL 8.
 
-## Tecnologías
-- JDK 17
-- Apache Tomcat 11 (Jakarta Servlet 6)
-- JSP / JSTL
-- JDBC
-- MySQL 8
-- MySQL Connector/J agregado manualmente (sin dependencia Maven)
+## Instalación
+1. Ejecuta `database/cekalix_ventas.sql` en MySQL Workbench.
+2. Configura opcionalmente `CEKALIX_DB_URL`, `CEKALIX_DB_USER` y `CEKALIX_DB_PASSWORD`. Valores por defecto: localhost:3306/cekalix_ventas, root y contraseña vacía.
+3. Ejecuta `mvn clean package`.
+4. Despliega `target/CEKALIX-VENTAS.war` en Tomcat 11 o importa como Existing Maven Project en Eclipse y usa Run on Server.
+5. Abre http://localhost:8080/CEKALIX-VENTAS/
 
-## Estructura
-- Modelo: JavaBeans y DAO.
-- Vista: JSP en `src/main/webapp/WEB-INF/vistas`.
-- Controlador: Servlets anotados con `@WebServlet`.
-- Utilidades: conexión JDBC centralizada en `ConexionBD.java`.
-- Driver JDBC: `src/main/webapp/WEB-INF/lib/mysql-connector-j-9.5.0.jar`.
+## Acceso inicial
+Usuario `admin`, contraseña `admin123`. El hash se valida con PBKDF2-HMAC-SHA256. Cambia las credenciales de demostración antes de usar datos reales.
 
-## Preparación
+## Módulos
+- Inicio y cierre de sesión.
+- Control de acceso por sesión y roles Administrador/Vendedor.
+- Panel principal.
+- Gestión básica de clientes.
+- Catálogo y alta de productos.
+- Generación y consulta de cotizaciones (sin descuento de stock).
+- Registro de ventas con varios productos, validación de existencias y transacción JDBC.
+- Historial de ventas.
+- Administración básica de usuarios y reporte resumido (solo administrador).
 
-1. Ejecuta `database/cekalix_ventas.sql` en MySQL.
-2. Descarga MySQL Connector/J desde la página oficial: https://dev.mysql.com/downloads/connector/j/
-3. Extrae el ZIP descargado y copia el archivo `mysql-connector-j-9.5.0.jar` en:
-   `src/main/webapp/WEB-INF/lib/`
-4. En Eclipse, agrega el JAR al Build Path:
-   **clic derecho al proyecto > Build Path > Configure Build Path > Libraries > Add JARs...**
-   y selecciona el JAR dentro de `WEB-INF/lib`.
-5. Ajusta las credenciales de MySQL en `src/main/java/com/cekalix/util/ConexionBD.java`.
-6. Configura Tomcat 11 y ejecuta **Run As > Run on Server**.
-7. Abre `http://localhost:8080/CEKALIX-VENTAS/`.
+## Arquitectura
+- Vista: JSP/HTML/CSS dentro de `WEB-INF/vistas`.
+- Controlador: Servlets.
+- Modelo: JavaBeans.
+- Persistencia: DAO + JDBC.
+- Seguridad: filtro de sesión/rol y contraseñas PBKDF2.
 
-**Importante:** el proyecto conserva su estructura de carpetas Maven para compilar y empaquetar el WAR, pero MySQL Connector/J ya no se declara como dependencia Maven. El archivo JAR se incorpora manualmente y debe quedar dentro de `WEB-INF/lib` para que Tomcat pueda cargarlo.
-
-## Usuario de demostración
-- Usuario: `admin`
-- Contraseña: `admin123`
-
-La clave en texto plano se usa únicamente para este prototipo académico local. No usar así en producción.
-
-## Alcance inicial
-Incluye login, panel principal y consulta de productos. El módulo de registro de ventas se implementará después. No se han ejecutado pruebas contra tu instalación local de MySQL/Tomcat.
+## Límites de esta versión
+Los comprobantes son registros internos de control, no comprobantes electrónicos autorizados por SUNAT. Aún faltan: edición avanzada, conversión de cotización a venta, emisión/descarga PDF, reportes de flujo de caja, auditoría, paginación y pruebas automatizadas.
