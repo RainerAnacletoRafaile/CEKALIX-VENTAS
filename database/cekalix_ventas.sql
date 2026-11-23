@@ -1,41 +1,13 @@
-CREATE DATABASE IF NOT EXISTS cekalix_ventas
-    CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS cekalix_ventas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE cekalix_ventas;
-
-CREATE TABLE IF NOT EXISTS usuario (
-    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    usuario VARCHAR(50) NOT NULL UNIQUE,
-    clave VARCHAR(100) NOT NULL,
-    rol VARCHAR(30) NOT NULL DEFAULT 'VENDEDOR',
-    activo TINYINT(1) NOT NULL DEFAULT 1
-);
-
-CREATE TABLE IF NOT EXISTS producto (
-    id_producto INT AUTO_INCREMENT PRIMARY KEY,
-    sku VARCHAR(40) NOT NULL UNIQUE,
-    nombre VARCHAR(120) NOT NULL,
-    descripcion VARCHAR(255),
-    precio DECIMAL(10,2) NOT NULL DEFAULT 0,
-    stock INT NOT NULL DEFAULT 0,
-    activo TINYINT(1) NOT NULL DEFAULT 1
-);
-
-CREATE TABLE IF NOT EXISTS venta (
-    id_venta INT AUTO_INCREMENT PRIMARY KEY,
-    cliente VARCHAR(150) NOT NULL,
-    fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    total DECIMAL(12,2) NOT NULL DEFAULT 0,
-    estado VARCHAR(30) NOT NULL DEFAULT 'REGISTRADA'
-);
-
--- Clave en texto plano solo para probar localmente este prototipo académico.
-INSERT INTO usuario (nombre, usuario, clave, rol)
-VALUES ('Administrador', 'admin', 'admin123', 'ADMIN')
-ON DUPLICATE KEY UPDATE nombre = VALUES(nombre);
-
-INSERT INTO producto (sku, nombre, descripcion, precio, stock)
-VALUES
-('SKU-0001', 'Producto de ejemplo A', 'Registro de demostración', 25.00, 100),
-('SKU-0002', 'Producto de ejemplo B', 'Registro de demostración', 48.50, 50)
-ON DUPLICATE KEY UPDATE nombre = VALUES(nombre);
+CREATE TABLE IF NOT EXISTS rol(id_rol INT AUTO_INCREMENT PRIMARY KEY,nombre VARCHAR(30) NOT NULL UNIQUE);
+CREATE TABLE IF NOT EXISTS usuario(id_usuario INT AUTO_INCREMENT PRIMARY KEY,id_rol INT NOT NULL,nombre VARCHAR(100) NOT NULL,usuario VARCHAR(50) NOT NULL UNIQUE,contrasena VARCHAR(255) NOT NULL,estado TINYINT(1) NOT NULL DEFAULT 1,creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,FOREIGN KEY(id_rol) REFERENCES rol(id_rol));
+CREATE TABLE IF NOT EXISTS cliente(id_cliente INT AUTO_INCREMENT PRIMARY KEY,tipo_cliente VARCHAR(30) NOT NULL DEFAULT 'PERSONA',razon_social VARCHAR(150) NOT NULL,ruc VARCHAR(11) NULL UNIQUE,telefono VARCHAR(20),correo VARCHAR(120),direccion VARCHAR(180),contacto VARCHAR(100),estado TINYINT(1) NOT NULL DEFAULT 1,creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS producto(id_producto INT AUTO_INCREMENT PRIMARY KEY,sku VARCHAR(40) NOT NULL UNIQUE,nombre VARCHAR(120) NOT NULL,medida VARCHAR(50),grosor VARCHAR(50),color VARCHAR(50),descripcion VARCHAR(255),precio DECIMAL(12,2) NOT NULL DEFAULT 0,stock INT NOT NULL DEFAULT 0,estado TINYINT(1) NOT NULL DEFAULT 1,CHECK(precio>=0),CHECK(stock>=0));
+CREATE TABLE IF NOT EXISTS cotizacion(id_cotizacion INT AUTO_INCREMENT PRIMARY KEY,id_cliente INT NOT NULL,id_usuario INT NOT NULL,fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,vence_el DATE NULL,estado VARCHAR(25) NOT NULL DEFAULT 'PENDIENTE',observaciones VARCHAR(500),subtotal DECIMAL(12,2) NOT NULL DEFAULT 0,igv DECIMAL(12,2) NOT NULL DEFAULT 0,total DECIMAL(12,2) NOT NULL DEFAULT 0,FOREIGN KEY(id_cliente) REFERENCES cliente(id_cliente),FOREIGN KEY(id_usuario) REFERENCES usuario(id_usuario));
+CREATE TABLE IF NOT EXISTS detalle_cotizacion(id_detalle_cotizacion INT AUTO_INCREMENT PRIMARY KEY,id_cotizacion INT NOT NULL,id_producto INT NOT NULL,cantidad INT NOT NULL,precio_unitario DECIMAL(12,2) NOT NULL,subtotal DECIMAL(12,2) NOT NULL,FOREIGN KEY(id_cotizacion) REFERENCES cotizacion(id_cotizacion),FOREIGN KEY(id_producto) REFERENCES producto(id_producto),CHECK(cantidad>0));
+CREATE TABLE IF NOT EXISTS venta(id_venta INT AUTO_INCREMENT PRIMARY KEY,id_cliente INT NOT NULL,id_usuario INT NOT NULL,id_cotizacion INT NULL,tipo_comprobante VARCHAR(20) NOT NULL DEFAULT 'BOLETA',serie VARCHAR(10) NOT NULL DEFAULT 'B001',numero INT NOT NULL,fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,metodo_pago VARCHAR(40) NOT NULL DEFAULT 'EFECTIVO',estado VARCHAR(25) NOT NULL DEFAULT 'EMITIDA',subtotal DECIMAL(12,2) NOT NULL DEFAULT 0,igv DECIMAL(12,2) NOT NULL DEFAULT 0,total DECIMAL(12,2) NOT NULL DEFAULT 0,FOREIGN KEY(id_cliente) REFERENCES cliente(id_cliente),FOREIGN KEY(id_usuario) REFERENCES usuario(id_usuario),FOREIGN KEY(id_cotizacion) REFERENCES cotizacion(id_cotizacion),UNIQUE KEY uk_comprobante(tipo_comprobante,serie,numero));
+CREATE TABLE IF NOT EXISTS detalle_venta(id_detalle_venta INT AUTO_INCREMENT PRIMARY KEY,id_venta INT NOT NULL,id_producto INT NOT NULL,cantidad INT NOT NULL,precio_unitario DECIMAL(12,2) NOT NULL,subtotal DECIMAL(12,2) NOT NULL,FOREIGN KEY(id_venta) REFERENCES venta(id_venta),FOREIGN KEY(id_producto) REFERENCES producto(id_producto),CHECK(cantidad>0));
+INSERT IGNORE INTO rol(nombre) VALUES('ADMINISTRADOR'),('VENDEDOR');
+INSERT INTO usuario(id_rol,nombre,usuario,contrasena,estado) SELECT id_rol,'Administrador CEKALIX','admin','pbkdf2$210000$ztQQ71dprXeN/g+HmJbYcA==$cwImEMwIPpGvbf/p30FQ/+iVej7uPoi3ylP2Y+IT7eU=',1 FROM rol WHERE nombre='ADMINISTRADOR' AND NOT EXISTS(SELECT 1 FROM usuario WHERE usuario='admin');
+INSERT IGNORE INTO producto(sku,nombre,medida,grosor,color,descripcion,precio,stock) VALUES('SKU-0001','Producto de demostración','Unidad','Estándar','Natural','Reemplazar por catálogo real',25.00,100),('SKU-0002','Producto de demostración 2','Unidad','Estándar','Natural','Reemplazar por catálogo real',48.50,50);
