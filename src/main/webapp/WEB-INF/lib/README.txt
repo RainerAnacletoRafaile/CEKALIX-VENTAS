@@ -1,10 +1,7 @@
-Coloca en esta carpeta el archivo mysql-connector-j-9.5.0.jar.
+MySQL Connector/J 9.5.0 (requerido; NO se usa Maven).
 
-Descarga oficial:
-https://dev.mysql.com/downloads/connector/j/
+1. Descarga el ZIP oficial desde https://dev.mysql.com/downloads/connector/j/
+2. Selecciona Platform Independent.
+3. Extrae mysql-connector-j-9.5.0.jar en esta carpeta.
 
-Extrae el ZIP y copia el JAR aquí. Luego, en Eclipse:
-clic derecho al proyecto > Build Path > Configure Build Path > Libraries > Add JARs...
-Selecciona este archivo.
-
-No agregues MySQL Connector/J como dependencia en pom.xml.
+El archivo JAR se mantiene fuera del repositorio por ser una dependencia binaria distribuida por Oracle/MySQL. Eclipse y Tomcat lo cargaran desde WEB-INF/lib una vez copiado.

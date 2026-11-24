@@ -1,0 +1,4 @@
+package com.cekalix.filtro;
+import jakarta.servlet.*;import jakarta.servlet.annotation.WebFilter;import jakarta.servlet.http.*;import java.io.*;
+@WebFilter(urlPatterns={"/inicio","/clientes","/productos","/cotizaciones","/ventas","/usuarios","/reportes"})
+public class AutenticacionFiltro implements Filter {public void doFilter(ServletRequest a,ServletResponse b,FilterChain chain)throws IOException,ServletException{HttpServletRequest q=(HttpServletRequest)a;HttpServletResponse p=(HttpServletResponse)b;HttpSession s=q.getSession(false);if(s==null||s.getAttribute("usuarioSesion")==null){p.sendRedirect(q.getContextPath()+"/login");return;}String uri=q.getRequestURI();com.cekalix.modelo.Usuario u=(com.cekalix.modelo.Usuario)s.getAttribute("usuarioSesion");if((uri.endsWith("/usuarios")||uri.endsWith("/reportes"))&&!"ADMINISTRADOR".equals(u.getRol())){p.sendError(403,"Acceso restringido al administrador.");return;}chain.doFilter(a,b);}}

@@ -1,33 +1,6 @@
 package com.cekalix.dao;
-
-import com.cekalix.modelo.Producto;
-import com.cekalix.util.ConexionBD;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.cekalix.modelo.Producto;import com.cekalix.util.ConexionBD;import java.sql.*;import java.util.*;
 public class ProductoDAO {
-    public List<Producto> listar() throws SQLException {
-        String sql = "SELECT id_producto, sku, nombre, descripcion, precio, stock " +
-                     "FROM producto WHERE activo = 1 ORDER BY nombre";
-        List<Producto> productos = new ArrayList<>();
-        try (Connection cn = ConexionBD.obtenerConexion();
-             PreparedStatement ps = cn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Producto p = new Producto();
-                p.setIdProducto(rs.getInt("id_producto"));
-                p.setSku(rs.getString("sku"));
-                p.setNombre(rs.getString("nombre"));
-                p.setDescripcion(rs.getString("descripcion"));
-                p.setPrecio(rs.getBigDecimal("precio"));
-                p.setStock(rs.getInt("stock"));
-                productos.add(p);
-            }
-        }
-        return productos;
-    }
+ public List<Producto> listar()throws SQLException{List<Producto> l=new ArrayList<>();try(Connection c=ConexionBD.obtenerConexion();PreparedStatement p=c.prepareStatement("SELECT * FROM producto WHERE estado=1 ORDER BY nombre");ResultSet r=p.executeQuery()){while(r.next()){Producto x=new Producto();x.setIdProducto(r.getInt("id_producto"));x.setSku(r.getString("sku"));x.setNombre(r.getString("nombre"));x.setDescripcion(r.getString("descripcion"));x.setPrecio(r.getBigDecimal("precio"));x.setStock(r.getInt("stock"));l.add(x);}}return l;}
+ public void guardar(String sku,String nombre,String descripcion,java.math.BigDecimal precio,int stock)throws SQLException{try(Connection c=ConexionBD.obtenerConexion();PreparedStatement p=c.prepareStatement("INSERT INTO producto(sku,nombre,descripcion,precio,stock) VALUES(?,?,?,?,?)")){p.setString(1,sku);p.setString(2,nombre);p.setString(3,descripcion);p.setBigDecimal(4,precio);p.setInt(5,stock);p.executeUpdate();}}
 }

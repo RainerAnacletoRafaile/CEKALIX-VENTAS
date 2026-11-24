@@ -1,18 +1,18 @@
 package com.cekalix.controlador;
 
 import com.cekalix.dao.UsuarioDAO;
-import com.cekalix.modelo.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Optional;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+    private final UsuarioDAO dao = new UsuarioDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -27,23 +27,27 @@ public class LoginServlet extends HttpServlet {
         String usuario = request.getParameter("usuario");
         String clave = request.getParameter("clave");
 
-        if (usuario == null || usuario.isBlank() || clave == null || clave.isBlank()) {
-            request.setAttribute("error", "Ingresa tu usuario y contraseña.");
-            request.getRequestDispatcher("/WEB-INF/vistas/login.jsp").forward(request, response);
-            return;
-        }
-
         try {
-            Optional<Usuario> resultado = usuarioDAO.validar(usuario.trim(), clave);
+            var resultado = dao.autenticar(
+                usuario == null ? "" : usuario.trim(),
+                clave == null ? "" : clave
+            );
+
             if (resultado.isPresent()) {
                 request.getSession(true).setAttribute("usuarioSesion", resultado.get());
                 response.sendRedirect(request.getContextPath() + "/inicio");
-            } else {
-                request.setAttribute("error", "Usuario o contraseña incorrectos.");
-                request.getRequestDispatcher("/WEB-INF/vistas/login.jsp").forward(request, response);
+                return;
             }
+
+            request.setAttribute("error", "Usuario o contraseña incorrectos.");
+            doGet(request, response);
         } catch (SQLException e) {
-            throw new ServletException("Error al consultar la base de datos.", e);
+            // El detalle queda en la consola del servidor; no se expone a usuarios.
+            getServletContext().log("Error de autenticación de CEKALIX-VENTAS", e);
+            request.setAttribute("error",
+                "No se pudo conectar con la base de datos. Revisa la consola de Tomcat "
+                + "y la configuración de conexión MySQL.");
+            doGet(request, response);
         }
     }
 }

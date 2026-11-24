@@ -5,34 +5,52 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * Gestiona la conexión JDBC con MySQL.
+ * Centraliza la conexión JDBC de CEKALIX-VENTAS.
  *
- * El driver MySQL Connector/J se agrega manualmente en:
- * src/main/webapp/WEB-INF/lib/mysql-connector-j-9.5.0.jar
+ * Configuración local predeterminada para MySQL Workbench / MySQL80:
+ * host=localhost, puerto=3306, base=cekalix_ventas_mvc, usuario=root.
+ *
+ * Para no publicar contraseñas en GitHub, la clave se lee desde
+ * CEKALIX_DB_PASSWORD. Si no existe, se usa la clave de desarrollo vacía.
+ * También se pueden sobrescribir URL y usuario con variables de entorno.
  */
 public final class ConexionBD {
 
-    private static final String URL =
-            "jdbc:mysql://localhost:3306/cekalix_ventas?useSSL=false&serverTimezone=UTC";
-    private static final String USUARIO = "root";
-    private static final String CLAVE = "";
+    private static final String URL_PREDETERMINADA =
+        "jdbc:mysql://localhost:3306/cekalix_ventas_mvc"
+        + "?useSSL=false"
+        + "&allowPublicKeyRetrieval=true"
+        + "&serverTimezone=America/Lima"
+        + "&characterEncoding=UTF-8";
 
     private ConexionBD() {
-        // Evita crear instancias de esta clase utilitaria.
     }
 
     public static Connection obtenerConexion() throws SQLException {
+        String url = System.getenv().getOrDefault("CEKALIX_DB_URL", URL_PREDETERMINADA);
+        String usuario = System.getenv().getOrDefault("CEKALIX_DB_USER", "root");
+        String clave = System.getenv().getOrDefault("CEKALIX_DB_PASSWORD", "");
+
         try {
-            // Carga explícita del driver incluido manualmente en WEB-INF/lib.
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
             throw new SQLException(
-                    "No se encontró MySQL Connector/J. Coloca mysql-connector-j-9.5.0.jar "
-                    + "dentro de WEB-INF/lib y vuelve a desplegar la aplicación.",
-                    e
+                "No se encontró MySQL Connector/J. Verifica que Maven haya descargado "
+                + "la dependencia mysql-connector-j y que esté incluida en WEB-INF/lib.",
+                e
             );
         }
 
-        return DriverManager.getConnection(URL, USUARIO, CLAVE);
+        try {
+            return DriverManager.getConnection(url, usuario, clave);
+        } catch (SQLException e) {
+            throw new SQLException(
+                "No se pudo conectar a MySQL en localhost:3306/cekalix_ventas_mvc. "
+                + "Verifica que el servicio MySQL80 esté iniciado y configura "
+                + "CEKALIX_DB_PASSWORD con la contraseña del usuario root en Eclipse "
+                + "o en las variables de entorno del sistema.",
+                e
+            );
+        }
     }
 }

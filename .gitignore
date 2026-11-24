@@ -1,8 +1,15 @@
+# Compilados y artefactos locales
+/build/
+/dist/
 /target/
-.classpath
-.project
-.settings/
-.metadata/
 *.class
 *.log
+
+# Estado local de Eclipse (se versionan .project, .classpath y .settings)
+/.metadata/
+.settings/org.eclipse.core.resources.prefs
+.settings/org.eclipse.jdt.ui.prefs
+
+# Sistema operativo
 .DS_Store
+Thumbs.db

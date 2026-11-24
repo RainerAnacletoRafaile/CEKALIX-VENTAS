@@ -1,0 +1,6 @@
+package com.cekalix.controlador;
+import com.cekalix.dao.ClienteDAO;import com.cekalix.modelo.Cliente;import jakarta.servlet.*;import jakarta.servlet.annotation.WebServlet;import jakarta.servlet.http.*;import java.io.*;import java.sql.*;
+@WebServlet("/clientes")
+public class ClienteServlet extends HttpServlet {private final ClienteDAO dao=new ClienteDAO();
+protected void doGet(HttpServletRequest q,HttpServletResponse p)throws ServletException,IOException{try{q.setAttribute("clientes",dao.listar());q.getRequestDispatcher("/WEB-INF/vistas/clientes.jsp").forward(q,p);}catch(SQLException e){throw new ServletException(e);}}
+protected void doPost(HttpServletRequest q,HttpServletResponse p)throws ServletException,IOException{try{Cliente x=new Cliente();x.setTipoCliente(q.getParameter("tipo"));x.setRazonSocial(q.getParameter("razonSocial"));x.setRuc(q.getParameter("ruc"));x.setTelefono(q.getParameter("telefono"));x.setCorreo(q.getParameter("correo"));x.setDireccion(q.getParameter("direccion"));x.setContacto(q.getParameter("contacto"));if(x.getRazonSocial()==null||x.getRazonSocial().isBlank())throw new SQLException("La razón social es obligatoria.");dao.guardar(x);p.sendRedirect(q.getContextPath()+"/clientes");}catch(Exception e){throw new ServletException("No se pudo guardar el cliente: "+e.getMessage(),e);}}}
